@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -248,28 +249,36 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 	}
 	defer r.Body.Close()
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return &res
-	} else {
-		var bodyMap map[string]interface{}
-		err := json.Unmarshal(body, &bodyMap)
+	if res.Code = uint16(r.StatusCode); res.Code < 200 && res.Code != 0 || res.Code >= 400 {
+		res.Error = r.Status
+	}
+
+	if res.Code == 200 {
+		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return &res
 		} else {
-			if !AssertNear(&tgt.Assertion, &bodyMap) {
-				r.StatusCode = -1
+			var bodyMap map[string]interface{}
+			err := json.Unmarshal(body, &bodyMap)
+			if err != nil {
+				return &res
+			} else {
+				if !AssertNear(&tgt.Assertion, &bodyMap) {
+					r.StatusCode = -1
+				}
 			}
 		}
+		res.BytesIn = uint64(len(body))
+	} else {
+		in, err := io.Copy(ioutil.Discard, r.Body)
+		if err != nil {
+			return &res
+		}
+		res.BytesIn = uint64(in)
 	}
-	res.BytesIn = uint64(len(body))
 
 	if req.ContentLength != -1 {
 		res.BytesOut = uint64(req.ContentLength)
-	}
-
-	if res.Code = uint16(r.StatusCode); res.Code < 200 && res.Code != 0 || res.Code >= 400 {
-		res.Error = r.Status
 	}
 
 	return &res
