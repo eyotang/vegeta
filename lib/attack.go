@@ -263,7 +263,7 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 			if err != nil {
 				return &res
 			} else {
-				if !AssertNear(&tgt.Assertion, &bodyMap) {
+				if !ExpectNear(tgt.Expectation, bodyMap) {
 					res.Code = 417
 					res.Error = "Expectation Failed"
 				}

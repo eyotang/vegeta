@@ -21,7 +21,7 @@ type Target struct {
 	URL    string
 	Body   []byte
 	Header http.Header
-	Assertion map[string]interface{}
+	Expectation map[string]interface{}
 }
 
 // Request creates an *http.Request out of Target and returns it along with an

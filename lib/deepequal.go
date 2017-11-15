@@ -184,7 +184,7 @@ func deepValueEqual(v1, v2 reflect.Value, visited map[visit]bool, depth int) boo
 // values that have been compared before, it treats the values as
 // equal rather than examining the values to which they point.
 // This ensures that DeepEqual terminates.
-func AssertNear(x, y interface{}) bool {
+func ExpectNear(x, y interface{}) bool {
 	if x == nil || y == nil {
 		return x == y
 	}
