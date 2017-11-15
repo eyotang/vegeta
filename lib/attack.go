@@ -3,7 +3,7 @@ package vegeta
 import (
 	"crypto/tls"
 	"fmt"
-	"io"
+	"encoding/json"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -248,17 +248,27 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 	}
 	defer r.Body.Close()
 
-	in, err := io.Copy(ioutil.Discard, r.Body)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return &res
+	} else {
+		var bodyMap map[string]interface{}
+		err := json.Unmarshal(body, &bodyMap)
+		if err != nil {
+			return &res
+		} else {
+			if !AssertEqual(&tgt.Assertion, &bodyMap) {
+				r.StatusCode = -1
+			}
+		}
 	}
-	res.BytesIn = uint64(in)
+	res.BytesIn = uint64(len(body))
 
 	if req.ContentLength != -1 {
 		res.BytesOut = uint64(req.ContentLength)
 	}
 
-	if res.Code = uint16(r.StatusCode); res.Code < 200 || res.Code >= 400 {
+	if res.Code = uint16(r.StatusCode); res.Code < 200 && res.Code != 0 || res.Code >= 400 {
 		res.Error = r.Status
 	}
 
@@ -270,4 +280,15 @@ func max(a, b time.Time) time.Time {
 		return a
 	}
 	return b
+}
+
+func AssertEqual(x, y interface{}) error {
+	for k, v := range tpl {
+		if real[k] == v {
+			return true
+		} else {
+			return AssertEqual(tpl, v)
+		}
+	}
+	return true
 }
