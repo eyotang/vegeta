@@ -249,7 +249,7 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 	}
 	defer r.Body.Close()
 
-	if res.Code = uint16(r.StatusCode); res.Code < 200 && res.Code != 0 || res.Code >= 400 {
+	if res.Code = uint16(r.StatusCode); res.Code < 200 || res.Code >= 400 {
 		res.Error = r.Status
 	}
 
