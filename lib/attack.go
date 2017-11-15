@@ -257,7 +257,7 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 		if err != nil {
 			return &res
 		} else {
-			if !AssertEqual(&tgt.Assertion, &bodyMap) {
+			if !AssertNear(&tgt.Assertion, &bodyMap) {
 				r.StatusCode = -1
 			}
 		}
@@ -280,15 +280,4 @@ func max(a, b time.Time) time.Time {
 		return a
 	}
 	return b
-}
-
-func AssertEqual(x, y interface{}) error {
-	for k, v := range tpl {
-		if real[k] == v {
-			return true
-		} else {
-			return AssertEqual(tpl, v)
-		}
-	}
-	return true
 }
