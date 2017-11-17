@@ -250,7 +250,7 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 	defer r.Body.Close()
 
 	if res.Code = uint16(r.StatusCode); res.Code < 200 || res.Code >= 400 {
-		res.Error = r.Status
+		res.Error = fmt.Sprintf("%v: %s", res.Code, r.Status)
 	}
 
 	if res.Code == 200 {
@@ -265,7 +265,7 @@ func (a *Attacker) hit(tr Targeter, tm time.Time) *Result {
 			} else {
 				if !ExpectNear(tgt.Expectation, bodyMap) {
 					res.Code = 417
-					res.Error = "Expectation Failed"
+					res.Error = fmt.Sprintf("%v: %s", res.Code, "Expectation Failed")
 				}
 			}
 		}
